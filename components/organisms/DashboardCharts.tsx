@@ -17,30 +17,24 @@ export default function DashboardCharts({ retailData }: DashboardChartsProps) {
 
   
   const convertForYear = (year: number) => {
+    const monthlyMap = new Map<number, number>();
+  
     
-    const filtered = retailData.filter((row) => {
+    retailData.forEach((row) => {
       const dt = new Date(row.Period);
-      return dt.getFullYear() === year;
+      if (dt.getFullYear() === year) {
+        monthlyMap.set(dt.getMonth(), row.Value);
+      }
     });
-
+  
     
-    filtered.sort((a, b) => {
-      const da = new Date(a.Period).getTime();
-      const db = new Date(b.Period).getTime();
-      return da - db;
-    });
-
-    
-    return filtered.map((row) => {
-      const dt = new Date(row.Period);
-      const monthIndex = dt.getMonth(); 
-      return {
-        month: monthNames[monthIndex],
-        sales: row.Value,
-      };
-    });
+    const completed = Array.from({ length: 12 }, (_, monthIndex) => ({
+      month: monthNames[monthIndex],
+      sales: monthlyMap.get(monthIndex) ?? 0,
+    }));
+  
+    return completed;
   };
-
   const data2022 = convertForYear(2022);
   const data2023 = convertForYear(2023);
   const data2024 = convertForYear(2024);
@@ -49,9 +43,9 @@ export default function DashboardCharts({ retailData }: DashboardChartsProps) {
     <div className="container mx-auto p-6">
       <FilterInput value={threshold} onChange={setThreshold} />
 
-      <SalesChartCard data={data2024} year={2024} threshold={threshold} />
-      <SalesChartCard data={data2023} year={2023} threshold={threshold} />
-      <SalesChartCard data={data2022} year={2022} threshold={threshold} />
+      <SalesChartCard data={data2024} year={2024} />
+      <SalesChartCard data={data2023} year={2023} />
+      <SalesChartCard data={data2022} year={2022} />
     </div>
   );
 }
